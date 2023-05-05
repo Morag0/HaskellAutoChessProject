@@ -1,8 +1,13 @@
-module GameLogic (
+module Logic (
+    moveTowardsEnemy,
     isValidMove,
     adjacentSquares,
     playerHasWon,
-    squareIsEnemy
+    squareIsEnemy,
+    findClosestEnemy,
+    findClosestEnemyHelper,
+    isEmptySquare,
+    distance
 ) where
 
 import Board

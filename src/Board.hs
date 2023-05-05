@@ -12,7 +12,7 @@ module Board (
     PieceType(..),
     Position(..)
 ) where
--- | Hello 
+
 import Data.List (intercalate)
 import Data.Char(toLower)
 
@@ -44,6 +44,7 @@ emptySquares board = [Position x y | x <- [0..width-1], y <- [0..height-1], getS
   where
     width = length (head board)
     height = length board
+    
 
 
 

@@ -1,4 +1,4 @@
-module GameState (
+module State (
     GameState(..),
     addPiece,
     setShopping,
@@ -8,7 +8,7 @@ module GameState (
     runGame
 ) where
 
-import Control.Monad.State.Lazy
+import Control.Monad.State
 
 
 import Board
