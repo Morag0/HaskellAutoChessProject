@@ -16,7 +16,7 @@ import Board
 
 -- | Given a board and a position of a piece, it returns the position the piece would want to move to.
 -- | If the piece cannot move, returns the same position.
-moveTowardsEnemy :: Board -> Position -> Position
+moveTowardsEnemy :: GameBoard -> Position -> Position
 moveTowardsEnemy board pos =
   case findClosestEnemy board pos of
     Just enemyPos ->
@@ -31,11 +31,11 @@ moveTowardsEnemy board pos =
 
 
 -- | Finds all adjacent squares that can be moved to
-adjacentSquares :: Board -> Position -> [Position]
+adjacentSquares :: GameBoard -> Position -> [Position]
 adjacentSquares board (Position x y) = filter (isValidMove board (Position x y)) [Position (x+1) y, Position (x-1) y, Position x (y+1), Position x (y-1)]
 
 -- | This function checks if the move the piece is trying to do is valid. The pieces should be able to move up, down, left or right within the boards limits
-isValidMove :: Board -> Position -> Position -> Bool
+isValidMove :: GameBoard -> Position -> Position -> Bool
 isValidMove board (Position x1 y1) (Position x2 y2)
   | x2 < 0 || x2 >= width || y2 < 0 || y2 >= height = False
   | x1 == x2 && abs (y1 - y2) == 1 = True
@@ -48,19 +48,19 @@ isValidMove board (Position x1 y1) (Position x2 y2)
 
 
 -- | Function that checks if there are any Enemy pieces on there board. Returns True if there are none
-playerHasWon :: Board -> Bool
+playerHasWon :: GameBoard -> Bool
 playerHasWon board = all (not . squareIsEnemy) (concat board)
 
 -- | Helper Function to check if there is an Enemy piece on the square
 squareIsEnemy :: Square -> Bool
-squareIsEnemy (OccupiedSquare _ isEnemy) = isEnemy
+squareIsEnemy (OccupiedSquare _ isEnemy stats) = isEnemy
 squareIsEnemy EmptySquare = False
 
-findClosestEnemy :: Board -> Position -> Maybe Position
+findClosestEnemy :: GameBoard -> Position -> Maybe Position
 findClosestEnemy board pos = findClosestEnemyHelper board [(pos, 0)] []
 
 
-findClosestEnemyHelper :: Board -> [(Position, Int)] -> [Position] -> Maybe Position
+findClosestEnemyHelper :: GameBoard -> [(Position, Int)] -> [Position] -> Maybe Position
 findClosestEnemyHelper _ [] _ = Nothing
 findClosestEnemyHelper b ((p, d):ps) visited
   | squareIsEnemy (getSquare b p) = Just p
@@ -70,7 +70,7 @@ findClosestEnemyHelper b ((p, d):ps) visited
       in findClosestEnemyHelper b (ps ++ newSquares) (visited ++ adjSquares)
 
 
-isEmptySquare :: Board -> Position -> Bool
+isEmptySquare :: GameBoard -> Position -> Bool
 isEmptySquare b p = case getSquare b p of
                       EmptySquare -> True
                       _ -> False

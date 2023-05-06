@@ -1,10 +1,11 @@
 module State (
     GameState(..),
+    GamePhase(..),
     addPiece,
     setShopping,
     setPreparation,
     setBattle,
-    getPhase,
+    getPhase, 
     runGame
 ) where
 
@@ -16,15 +17,15 @@ import Board
 data GamePhase = Shopping | Preparation | Battle deriving (Eq, Show)
 
 data GameState = GameState {
-    board :: Board,
+    gameboard :: GameBoard,
     phase :: GamePhase
 }
 
 -- | Adds a piece to the board
-addPiece :: (Int, Int) -> (PieceType, Bool) -> State GameState ()
+addPiece :: (Int, Int) -> (PieceType, Bool, PieceStats) -> State GameState ()
 addPiece pos piece = do
     currentState <- get
-    put $ currentState { board = placePiece (board currentState) pos piece }
+    put $ currentState { gameboard = placePiece (gameboard currentState) pos piece }
 
 -- | Sets the game phase to Shopping
 setShopping :: State GameState ()
