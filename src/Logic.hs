@@ -1,5 +1,5 @@
 module Logic (
-    moveTowardsEnemy,
+    findPathTowardsClosestEnemy,
     isValidMove,
     adjacentSquares,
     playerHasWon,
@@ -16,8 +16,8 @@ import Board
 
 -- | Given a board and a position of a piece, it returns the position the piece would want to move to.
 -- | If the piece cannot move, returns the same position.
-moveTowardsEnemy :: GameBoard -> Position -> Position
-moveTowardsEnemy board pos =
+findPathTowardsClosestEnemy :: GameBoard -> Position -> Position
+findPathTowardsClosestEnemy board pos =
   case findClosestEnemy board pos of
     Just enemyPos ->
       let adjSquares = adjacentSquares board pos

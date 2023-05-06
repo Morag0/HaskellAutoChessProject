@@ -15,7 +15,7 @@ module Board (
     showSquare,
     showRow,
     showBoard,
-    GameBoard(..),
+    GameBoard,
     Square(..),
     Piece(..),
     PieceType(..),
