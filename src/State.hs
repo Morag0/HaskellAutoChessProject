@@ -6,11 +6,15 @@ module State (
     setShopping,
     setPreparation,
     setBattle,
-    getPhase, 
+    getPhase,
     runGame,
     moveAllPiecesTowardsEnemy,
     placePieceOnBoard,
-    hasPlayerWon
+    hasPlayerWon,
+    allPiecesAttack,
+    attackFrom,
+    inRange,
+    getAttackRange
 ) where
 
 import Control.Monad.State
@@ -23,7 +27,8 @@ data GamePhase = Shopping | Preparation | Battle deriving (Eq, Show)
 
 data GameState = GameState {
     gameboard :: GameBoard,
-    phase :: GamePhase
+    phase :: GamePhase,
+    collection :: [Piece]
 }
 
 -- | Adds a piece to the board
@@ -33,7 +38,7 @@ addPiece pos piece = do
     put $ currentState { gameboard = placePiece (gameboard currentState) pos piece }
 
 initialState :: GameState
-initialState = GameState { gameboard = emptyBoard 6 6, phase = Shopping }
+initialState = GameState { gameboard = emptyBoard 6 6, phase = Shopping, collection = [] }
 
 
 -- | Sets the game phase to Shopping
@@ -75,6 +80,7 @@ moveAllPiecesTowardsEnemy = do
     isPiece (OccupiedSquare _ False _) = True
     isPiece _ = False
 
+
 hasPlayerWon :: State GameState Bool
 hasPlayerWon = do
   currentState <- get
@@ -84,3 +90,38 @@ hasPlayerWon = do
 -- | Runs the game given an initial state
 runGame :: State GameState a -> GameState -> GameState
 runGame = execState
+
+
+allPiecesAttack :: State GameState ()
+allPiecesAttack = do
+  currentState <- get
+  let board = gameboard currentState
+      height = length board
+      width = length (head board)
+      piecePositions = [Position row col | row <- [0..(height-1)], col <- [0..(width-1)], getSquare board (Position row col) /= EmptySquare]
+  mapM_ attackFrom piecePositions
+
+
+
+
+attackFrom :: Position -> State GameState ()
+attackFrom pos = do
+  board <- gets gameboard
+  let attackingSquare = getSquare board pos
+  let width = length (head board)
+  let height = length board
+  case attackingSquare of
+    OccupiedSquare _ False attStats -> do
+      let attackRange = getAttackRange attStats
+      let positionsInRange = filter (inRange pos attackRange) [Position row col | row <- [0..(height-1)], col <- [0..(width-1)]]
+      let enemiesInRange = filter (\p -> let s = getSquare board p in case s of { OccupiedSquare _ True _ -> True; _ -> False }) positionsInRange
+      modify (\s -> s { gameboard = foldl (`doAttack` pos) board enemiesInRange })
+    _ -> return ()
+
+
+inRange :: Position -> Int -> Position -> Bool
+inRange (Position row1 col1) range (Position row2 col2) = abs (row1 - row2) + abs (col1 - col2) <= range
+
+getAttackRange :: PieceStats -> Int
+getAttackRange = attack
+

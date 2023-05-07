@@ -15,6 +15,7 @@ module Board (
     showSquare,
     showRow,
     showBoard,
+    doAttack,
     GameBoard,
     Square(..),
     Piece(..),
@@ -120,4 +121,20 @@ showBoard = unlines . map showRow
 
 printBoard :: GameBoard -> IO ()
 printBoard = putStrLn . showBoard
+
+doAttack :: GameBoard -> Position -> Position -> GameBoard
+doAttack board pos1 pos2 =
+  let attacker = getSquare board pos1
+      attacked = getSquare board pos2
+  in case (attacker, attacked) of
+        (_, EmptySquare) -> board -- Cannot attack an empty square
+        (OccupiedSquare _ _ attStats, OccupiedSquare pt isEnemy defStats)
+          | hp defStats > 0 -> let newHp = hp defStats - attack attStats
+                                   newSquare = if newHp > 0
+                                                 then OccupiedSquare pt isEnemy defStats { hp = newHp }
+                                                 else EmptySquare
+                               in setSquare board (row pos2, col pos2) newSquare
+          | otherwise -> board -- Cannot attack a piece with 0 HP
+        _ -> board 
+
 
